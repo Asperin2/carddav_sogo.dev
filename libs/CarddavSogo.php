@@ -199,7 +199,7 @@ class CarddavSogo
             }
         }
 
-        if (!$data['dismissal_date'] AND !$decret) {
+        if ((empty($data['dismissal_date']) OR '0000-00-00' == $data['dismissal_date']) AND !$decret) {
             return true;
         } else {
             return false;
