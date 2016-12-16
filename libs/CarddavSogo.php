@@ -23,8 +23,8 @@ class CarddavSogo
     const TABLE_QUICK_SOGO_DISSMISED = 'sogouser00322098e1d_quick';
     const TABLE_MAIN_SOGO_DISSMISED = 'sogouser00322098e1d';
 
-    const DECRET_GROUP = 'dd43039b-8003-4665-9ffb-28bfe500206b.vcf';
-    const DISMISSED_GROUP = '14b6476c-745d-4a71-99de-63ba675ef476.vcf';
+    const DECRET_GROUP = 'dd43039b-8003-4665-9ffb-28bfe500206b';
+    const DISMISSED_GROUP = '14b6476c-745d-4a71-99de-63ba675ef476';
 
     const CELL_PHONES = 1;
     const WORK_PHONES = 2;
