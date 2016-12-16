@@ -20,6 +20,9 @@ class CarddavSogo
     const TABLE_QUICK_SOGO = 'sogoadmin00239079b10_quick';
     const TABLE_MAIN_SOGO = 'sogoadmin00239079b10';
 
+    const TABLE_QUICK_SOGO_DISSMISED = 'sogouser00322098e1d_quick';
+    const TABLE_MAIN_SOGO_DISSMISED = 'sogouser00322098e1d';
+
     const CELL_PHONES = 1;
     const WORK_PHONES = 2;
     const HOME_PHONES = 3;
@@ -88,6 +91,33 @@ class CarddavSogo
                         $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
                         $mysqli2->query("DELETE FROM ".self::TABLE_QUICK_SOGO." WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
                     }
+                }
+
+
+                $result3 = $mysqli2->query("SELECT c_creationdate FROM ".self::TABLE_MAIN_SOGO_DISSMISED." WHERE c_name='".$uri."'");
+                if (empty($result3->fetch_array())) {
+                    $card = $this->makeVcard($data);
+                    if (!$this->userActive($data)) {
+                        $mysqli2->query("INSERT INTO ".self::TABLE_MAIN_SOGO_DISSMISED." (`c_name` ,`c_content`,`c_creationdate`, `c_lastmodified`, `c_version`)
+                    VALUES ('".$uri."', '" . $card . "', '" . time() . "', '" . time() . "', '0')") OR die(mysqli_error($mysqli2));
+
+                        $mysqli2->query("INSERT INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
+                    VALUES ('".$uri."', '".$data['firstname']."', '".$data['lastname'] . " " . $data['firstname'] . " " . $data['firstname2']."',
+                     '".$data['lastname']."', '".$data['organization']."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
+                    }
+                } else {
+                    $card = $this->makeVcard($data);
+                    if (!$this->userActive($data)) {
+                        $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
+
+                        $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
+                    VALUES ('".$uri."', '".$data['firstname']."', '".$data['lastname'] . " " . $data['firstname'] . " " . $data['firstname2']."',
+                     '".$data['lastname']."', '".$data['organization']."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
+                    } else {
+                        $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
+                        $mysqli2->query("DELETE FROM ".self::TABLE_QUICK_SOGO_DISSMISED." WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
+                    }
+
                 }
 
 
