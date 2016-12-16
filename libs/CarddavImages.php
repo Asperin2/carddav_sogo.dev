@@ -6,14 +6,14 @@
  * Date: 06.12.16
  * Time: 15:34
  */
-class carddavImages {
+class CarddavImages {
 
     public $host = '192.168.0.172';
     public $db_user = 'projecto';
     public $db_pass = 'pro3dav5';
     public $db_name = 'projectobook';
     public $width = 500;
-    public $folder = '/Users/eakhmetov/Sites/carddav_sogo.dev/photo/';
+    public $folder = '/home/eakhmetov/sogo/carddav_sogo.dev/photo/';
 
     function __construct() {
         $this->cardImages();

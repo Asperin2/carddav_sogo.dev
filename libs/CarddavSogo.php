@@ -13,12 +13,12 @@ class CarddavSogo
     const PASSWORD_172 = 'pro3dav5';
     const BD_172 = 'projectobook';
 
-    const HOST_SOGO = '192.168.1.250';
-    const USER_SOGO = 'sogo';
-    const PASSWORD_SOGO = 'sogo';
+    const HOST_SOGO = '127.0.0.1';
+    const USER_SOGO = 'root';
+    const PASSWORD_SOGO = 'ecocomp';
     const BD_SOGO = 'sogo2';
-    const TABLE_QUICK_SOGO = 'sogosogouser00133261f02_quick';
-    const TABLE_MAIN_SOGO = 'sogosogouser00133261f02';
+    const TABLE_QUICK_SOGO = 'sogoadmin00239079b10_quick';
+    const TABLE_MAIN_SOGO = 'sogoadmin00239079b10';
 
     const CELL_PHONES = 1;
     const WORK_PHONES = 2;
@@ -27,7 +27,7 @@ class CarddavSogo
     const PRIVATE_EMAILS = 2;
     const WORK_ADDRESSES = 1;
     const HOME_ADDRESSES = 2;
-    const PHOTO_PATH = '/Users/eakhmetov/Sites/carddav_sogo.dev/photo/';
+    const PHOTO_PATH = '/home/eakhmetov/sogo/carddav_sogo.dev/photo/';
 
     public $corpData = array (['name' => 'ПЭК, рекламный номер', 'phone' => '+7 (843) 273-77-22', 'note' => 'работает только на входящие', 'logo' => 'pek.png', 'uid' => 'bf229a3a-97d9-40f2-ad61-128a1b9bf6b4'],
         ['name' => ' Диспетчерская служба ПЭК', 'phone' => '+7 (843) 273-77-12', 'note' => 'работает только на входящие', 'logo' => 'pek.png', 'uid' => 'a9d02bc6-8d39-461c-ea65-06d0de727234'],
