@@ -57,6 +57,8 @@ class CarddavSogo
 
     public function importDb()
     {
+        $dissmised = array();
+        $in_decret = array();
         date_default_timezone_set("Europe/Moscow");
         $mysqli2 = new mysqli(self::HOST_SOGO, self::USER_SOGO, self::PASSWORD_SOGO, self::BD_SOGO);
         $mysqli2->query("SET NAMES utf8mb");
@@ -97,8 +99,7 @@ class CarddavSogo
                 }
 
 
-                $dissmised = array();
-                $in_decret = array();
+
                 $result3 = $mysqli2->query("SELECT c_creationdate FROM ".self::TABLE_MAIN_SOGO_DISSMISED." WHERE c_name='".$uri."'");
                 if (empty($result3->fetch_array())) {
                     $card = $this->makeVcard($data);
