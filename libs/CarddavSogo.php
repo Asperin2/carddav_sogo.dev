@@ -141,6 +141,7 @@ class CarddavSogo
 
                //@todo переписать корп выгрузку
                 // $this->addCorpNumbers(1);
+                $this->makeGroups($dissmised, $in_decret);
             }
         }
         echo "ok";
