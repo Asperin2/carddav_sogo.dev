@@ -23,6 +23,9 @@ class CarddavSogo
     const TABLE_QUICK_SOGO_DISSMISED = 'sogouser00322098e1d_quick';
     const TABLE_MAIN_SOGO_DISSMISED = 'sogouser00322098e1d';
 
+    const DECRET_GROUP = 'dd43039b-8003-4665-9ffb-28bfe500206b.vcf';
+    const DISMISSED_GROUP = '14b6476c-745d-4a71-99de-63ba675ef476.vcf';
+
     const CELL_PHONES = 1;
     const WORK_PHONES = 2;
     const HOME_PHONES = 3;
@@ -94,6 +97,8 @@ class CarddavSogo
                 }
 
 
+                $dissmised = array();
+                $in_decret = array();
                 $result3 = $mysqli2->query("SELECT c_creationdate FROM ".self::TABLE_MAIN_SOGO_DISSMISED." WHERE c_name='".$uri."'");
                 if (empty($result3->fetch_array())) {
                     $card = $this->makeVcard($data);
@@ -105,6 +110,12 @@ class CarddavSogo
                     VALUES ('".$uri."', '".$data['firstname']."', '".$data['lastname'] . " " . $data['firstname'] . " " . $data['firstname2']."',
                      '".$data['lastname']."', '".$data['organization']."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
                     }
+                    if ($this->inDecret($data)) {
+                        $in_decret[] = $data['uid'];
+                    }
+                    if ($this->dissmised($data)) {
+                        $dissmised[] = $data['uid'];
+                    }
                 } else {
                     $card = $this->makeVcard($data);
                     if (!$this->userActive($data)) {
@@ -113,6 +124,12 @@ class CarddavSogo
                         $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
                     VALUES ('".$uri."', '".$data['firstname']."', '".$data['lastname'] . " " . $data['firstname'] . " " . $data['firstname2']."',
                      '".$data['lastname']."', '".$data['organization']."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
+                        if ($this->inDecret($data)) {
+                            $in_decret[] = $data['uid'];
+                        }
+                        if ($this->dissmised($data)) {
+                            $dissmised[] = $data['uid'];
+                        }
                     } else {
                         $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
                         $mysqli2->query("DELETE FROM ".self::TABLE_QUICK_SOGO_DISSMISED." WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
@@ -237,6 +254,36 @@ class CarddavSogo
     }
 
     /**
+     * В декрете ли пользователь
+     * @param $data
+     * @return bool
+     */
+    private function inDecret($data) {
+        $decret = FALSE;
+        if (!empty($data['decret_start']) AND !empty($data['decret_end'])) {
+            $start = date_timestamp_get(date_create_from_format('Y-m-d', $data['decret_start']));
+            $end = date_timestamp_get(date_create_from_format('Y-m-d', $data['decret_end']));
+            if (time() > $start AND time() < $end) {
+                $decret = TRUE;
+            }
+        }
+        return $decret;
+    }
+
+    /**
+     * Уволен или нет пользователь
+     * @param $data
+     * @return bool
+     */
+    private function dissmised($data) {
+        if ((empty($data['dismissal_date']) OR '0000-00-00' == $data['dismissal_date'])) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
      * Готовим карточку
      * @param $data
      * @return string
@@ -316,12 +363,35 @@ class CarddavSogo
         }
     }
 
-    //@todo perepisat
-    public function getLastToken($table) {
-        $mysqli2 = new mysqli($this->host_carddav, $this->db_user_carddav, $this->db_pass_carddav, $this->db_name_carddav);
-        $result = $mysqli2->query("SELECT MAX(synctoken) AS token FROM ".$table);
-        $max = $result->fetch_assoc();
-        return $max['token'] + 1;
+    /**
+     * Делаем группы
+     * @param $dissmised
+     * @param $in_decret
+     */
+    private function makeGroups($dissmised, $in_decret) {
+        $vcard = "BEGIN:VCARD\nVERSION:3.0";
+        $vcard .= "\nUID:" . self::DISMISSED_GROUP;
+        $vcard .= "\nPRODID:-//Apple Inc.//Mac OS X 10.10.5//EN \nREV:" . date("Y-m-d\TH:i:sP");
+        $vcard .= "\nN:Уволенные";
+        $vcard .= "\nFN:Уволенные";
+        $vcard .= "\nX-ADDRESSBOOKSERVER-KIND:group";
+        if(!empty($dissmised)) {
+            foreach ($dissmised as $user_uid) {
+                $vcard .= "\nX-ADDRESSBOOKSERVER-MEMBER:urn:uuid:".$user_uid;
+            }
+        }
+        $vcard .= "\nEND:VCARD";
+
+        $mysqli2 = new mysqli(self::HOST_SOGO, self::USER_SOGO, self::PASSWORD_SOGO, self::BD_SOGO);
+        $mysqli2->query("SET NAMES utf8mb");
+
+        $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_content` = '".$vcard."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null 
+        WHERE `c_name` = '". self::DISMISSED_GROUP. ".vcf'") OR die(mysqli_error($mysqli2));
+
+        $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_component) 
+                    VALUES ('".self::DISMISSED_GROUP.".vcf', 'Уволенные', 'Уволенные', 'vcard')") OR die(mysqli_error($mysqli2));
+
+
     }
 
 
