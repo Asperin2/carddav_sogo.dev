@@ -393,6 +393,28 @@ class CarddavSogo
         $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_component) 
                     VALUES ('".self::DISMISSED_GROUP.".vcf', 'Уволенные', 'Уволенные', 'vcard')") OR die(mysqli_error($mysqli2));
 
+        $vcard = "BEGIN:VCARD\nVERSION:3.0";
+        $vcard .= "\nUID:" . self::DECRET_GROUP;
+        $vcard .= "\nPRODID:-//Apple Inc.//Mac OS X 10.10.5//EN \nREV:" . date("Y-m-d\TH:i:sP");
+        $vcard .= "\nN:Декрет";
+        $vcard .= "\nFN:Декрет";
+        $vcard .= "\nX-ADDRESSBOOKSERVER-KIND:group";
+        if(!empty($in_decret)) {
+            foreach ($in_decret as $user_uid) {
+                $vcard .= "\nX-ADDRESSBOOKSERVER-MEMBER:urn:uuid:".$user_uid;
+            }
+        }
+        $vcard .= "\nEND:VCARD";
+
+        $mysqli2 = new mysqli(self::HOST_SOGO, self::USER_SOGO, self::PASSWORD_SOGO, self::BD_SOGO);
+        $mysqli2->query("SET NAMES utf8mb");
+
+        $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_content` = '".$vcard."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null 
+        WHERE `c_name` = '". self::DISMISSED_GROUP. ".vcf'") OR die(mysqli_error($mysqli2));
+
+        $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_component) 
+                    VALUES ('".self::DECRET_GROUP.".vcf', 'Декрет', 'Декрет', 'vcard')") OR die(mysqli_error($mysqli2));
+
 
     }
 
