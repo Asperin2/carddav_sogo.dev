@@ -410,7 +410,7 @@ class CarddavSogo
         $mysqli2->query("SET NAMES utf8mb");
 
         $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_content` = '".$vcard."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null 
-        WHERE `c_name` = '". self::DISMISSED_GROUP. ".vcf'") OR die(mysqli_error($mysqli2));
+        WHERE `c_name` = '". self::DECRET_GROUP. ".vcf'") OR die(mysqli_error($mysqli2));
 
         $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_component) 
                     VALUES ('".self::DECRET_GROUP.".vcf', 'Декрет', 'Декрет', 'vcard')") OR die(mysqli_error($mysqli2));
