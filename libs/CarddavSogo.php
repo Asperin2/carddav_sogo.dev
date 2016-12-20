@@ -440,7 +440,7 @@ class CarddavSogo
 
         $result5 = $mysqli2->query("SELECT sm.c_name FROM " . self::TABLE_MAIN_SOGO . " sm JOIN " . self::TABLE_QUICK_SOGO . " sq ON sq.c_name = sm.c_name 
          WHERE sq.c_o = NULL") OR die(mysqli_error($mysqli2));
-        if (!empty($result4->fetch_array())) {
+        if (!empty($result5->fetch_array())) {
             while ($data = $result5->fetch_assoc()) {
                 $mysqli2->query("UPDATE " . self::TABLE_MAIN_SOGO . " SET `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
                 $mysqli2->query("DELETE FROM " . self::TABLE_QUICK_SOGO . " WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
