@@ -417,22 +417,27 @@ class CarddavSogo
     /**
      * Удаляем случайно созданные группы
      */
-    private function delFakedGroups() {
-        $need_groups = [self::DISMISSED_GROUP.'.vcf', self::DECRET_GROUP.'.vcf'];
+    private function delFakedGroups()
+    {
+        $need_groups = [self::DISMISSED_GROUP . '.vcf', self::DECRET_GROUP . '.vcf'];
         $mysqli2 = new mysqli(self::HOST_SOGO, self::USER_SOGO, self::PASSWORD_SOGO, self::BD_SOGO);
         $mysqli2->query("SET NAMES utf8mb");
-        $result4 = $mysqli2->query("SELECT sm.c_name FROM ".self::TABLE_MAIN_SOGO_DISSMISED." sm JOIN ".self::TABLE_MAIN_SOGO_DISSMISED." sq ON sq.c_name = sm.c_name 
-         WHERE sq.c_sn = NULL AND sm.c_name NOT IN (".implode(',', $need_groups).")");
-        while ($data = $result4->fetch_assoc()) {
-            $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $data['c_name']. "'") OR die(mysqli_error($mysqli2));
-            $mysqli2->query("DELETE FROM ".self::TABLE_QUICK_SOGO_DISSMISED." WHERE `c_name` = '". $data['c_name']. "'") OR die(mysqli_error($mysqli2));
+        $result4 = $mysqli2->query("SELECT sm.c_name FROM " . self::TABLE_MAIN_SOGO_DISSMISED . " sm JOIN " . self::TABLE_MAIN_SOGO_DISSMISED . " sq ON sq.c_name = sm.c_name 
+         WHERE sq.c_sn = NULL AND sm.c_name NOT IN (" . implode(',', $need_groups) . ")");
+        if (!empty($result4->fetch_array())) {
+            while ($data = $result4->fetch_assoc()) {
+                $mysqli2->query("UPDATE " . self::TABLE_MAIN_SOGO_DISSMISED . " SET `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
+                $mysqli2->query("DELETE FROM " . self::TABLE_QUICK_SOGO_DISSMISED . " WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
+            }
         }
 
-        $result4 = $mysqli2->query("SELECT sm.c_name FROM ".self::TABLE_MAIN_SOGO." sm JOIN ".self::TABLE_MAIN_SOGO." sq ON sq.c_name = sm.c_name 
+        $result5 = $mysqli2->query("SELECT sm.c_name FROM " . self::TABLE_MAIN_SOGO . " sm JOIN " . self::TABLE_MAIN_SOGO . " sq ON sq.c_name = sm.c_name 
          WHERE sq.c_sn = NULL");
-        while ($data = $result4->fetch_assoc()) {
-            $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO." SET `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $data['c_name']. "'") OR die(mysqli_error($mysqli2));
-            $mysqli2->query("DELETE FROM ".self::TABLE_QUICK_SOGO." WHERE `c_name` = '". $data['c_name']. "'") OR die(mysqli_error($mysqli2));
+        if (!empty($result4->fetch_array())) {
+            while ($data = $result5->fetch_assoc()) {
+                $mysqli2->query("UPDATE " . self::TABLE_MAIN_SOGO . " SET `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
+                $mysqli2->query("DELETE FROM " . self::TABLE_QUICK_SOGO . " WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
+            }
         }
     }
 }
