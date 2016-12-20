@@ -51,9 +51,7 @@ class CarddavSogo
     function __construct()
     {
 
-        $this->delFakedGroups();
-
-        //$this->importDb();
+        $this->importDb();
 
     }
 
@@ -423,8 +421,10 @@ class CarddavSogo
     private function delFakedGroups()
     {
         $need_groups = ["'".self::DISMISSED_GROUP . ".vcf'", "'".self::DECRET_GROUP . ".vcf'"];
-        echo "SELECT sm.c_name FROM " . self::TABLE_MAIN_SOGO_DISSMISED . " sm JOIN " . self::TABLE_QUICK_SOGO_DISSMISED . " sq ON sq.c_name = sm.c_name 
+        /*
+        echo "SELECT sm.c_name FROM " . self::TABLE_MAIN_SOGO_DISSMISED . " sm JOIN " . self::TABLE_QUICK_SOGO_DISSMISED . " sq ON sq.c_name = sm.c_name
          WHERE sq.c_sn = NULL AND sm.c_name NOT IN (" . implode(',', $need_groups) . ")";
+        */
         $mysqli2 = new mysqli(self::HOST_SOGO, self::USER_SOGO, self::PASSWORD_SOGO, self::BD_SOGO);
         $mysqli2->query("SET NAMES utf8mb");
         $result4 = $mysqli2->query("SELECT sm.c_name FROM " . self::TABLE_MAIN_SOGO_DISSMISED . " sm JOIN " . self::TABLE_QUICK_SOGO_DISSMISED . " sq ON sq.c_name = sm.c_name 
