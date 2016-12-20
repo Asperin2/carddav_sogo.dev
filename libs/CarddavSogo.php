@@ -138,10 +138,11 @@ class CarddavSogo
 
                //@todo переписать корп выгрузку
                 // $this->addCorpNumbers(1);
-                $this->makeGroups($dissmised, $in_decret);
-//                $this->delFakedGroups();
+                
             }
         }
+	$this->makeGroups($dissmised, $in_decret);
+        $this->delFakedGroups();
         echo "ok";
     }
 
