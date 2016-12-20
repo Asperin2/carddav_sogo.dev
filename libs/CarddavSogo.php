@@ -84,10 +84,6 @@ class CarddavSogo
                     if ($this->userActive($data)) {
                         $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
 
-                        /*
-                        $mysqli2->query("UPDATE ".self::TABLE_QUICK_SOGO."  SET c_givenname = '".$data['firstname']."', c_cn = '".$data['lastname'] . " " . $data['firstname'] . " " . $data['firstname2']."',
-                         c_sn = '".$data['lastname']."', c_o = '".$data['organization']."', c_ou = '".$data['jobtitle']."' WHERE `c_name` = '". $uri."'") OR die(mysqli_error($mysqli2));
-                        */
                         $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
                     VALUES ('".$uri."', '".$data['firstname']."', '".$data['lastname'] . " " . $data['firstname'] . " " . $data['firstname2']."',
                      '".$data['lastname']."', '".$data['organization']."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
@@ -143,6 +139,7 @@ class CarddavSogo
                //@todo переписать корп выгрузку
                 // $this->addCorpNumbers(1);
                 $this->makeGroups($dissmised, $in_decret);
+                $this->delFakedGroups();
             }
         }
         echo "ok";
@@ -415,8 +412,20 @@ class CarddavSogo
         $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_component) 
                     VALUES ('".self::DECRET_GROUP.".vcf', 'Декрет', 'Декрет', 'vcard')") OR die(mysqli_error($mysqli2));
 
-
     }
 
-
+    /**
+     * Удаляем случайно созданные группы
+     */
+    private function delFakedGroups() {
+        $need_groups = [self::DISMISSED_GROUP.'.vcf', self::DECRET_GROUP.'.vcf'];
+        $mysqli2 = new mysqli(self::HOST_SOGO, self::USER_SOGO, self::PASSWORD_SOGO, self::BD_SOGO);
+        $mysqli2->query("SET NAMES utf8mb");
+        $result4 = $mysqli2->query("SELECT sm.c_name FROM ".self::TABLE_MAIN_SOGO_DISSMISED." sm JOIN ".self::TABLE_MAIN_SOGO_DISSMISED." sq ON sq.c_name = sm.c_name 
+         WHERE sq.c_sn = NULL AND sm.c_name NOT IN (".implode(',', $need_groups).")");
+        while ($data = $result4->fetch_assoc()) {
+            $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $data['c_name']. "'") OR die(mysqli_error($mysqli2));
+            $mysqli2->query("DELETE FROM ".self::TABLE_QUICK_SOGO_DISSMISED." WHERE `c_name` = '". $data['c_name']. "'") OR die(mysqli_error($mysqli2));
+        }
+    }
 }
