@@ -51,8 +51,8 @@ class CarddavSogo
     function __construct()
     {
 
-        $this->delFakedGroups();
-        //$this->importDb();
+        //$this->delFakedGroups();
+        $this->importDb();
 
     }
 
@@ -441,7 +441,6 @@ class CarddavSogo
 
         $result5 = $mysqli2->query("SELECT c_name FROM " . self::TABLE_QUICK_SOGO . "  WHERE c_o = ''") OR die(mysqli_error($mysqli2));
             while ($data = $result5->fetch_assoc()) {
-                echo $data['c_name'];
                 $mysqli2->query("UPDATE " . self::TABLE_MAIN_SOGO . " SET `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
                 $mysqli2->query("DELETE FROM " . self::TABLE_QUICK_SOGO . " WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
             }
