@@ -51,7 +51,8 @@ class CarddavSogo
     function __construct()
     {
 
-        $this->importDb();
+        $this->delFakedGroups();
+        //$this->importDb();
 
     }
 
