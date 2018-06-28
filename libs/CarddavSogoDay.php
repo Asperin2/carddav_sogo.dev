@@ -76,8 +76,8 @@ class CarddavSogoDay
                     VALUES ('".$uri."', '" . $card . "', '" . time() . "', '" . time() . "', '0')") OR die(mysqli_error($mysqli2));
 
                         $mysqli2->query("INSERT INTO ".self::TABLE_QUICK_SOGO." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
-                    VALUES ('".$uri."', '".$data['firstname']."', '".$data['lastname'] . " " . $data['firstname'] . " " . $data['firstname2']."',
-                     '".$data['lastname']."', '".$data['organization']."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
+                    VALUES ('".$uri."', '".trim($data['firstname'])."', '".trim($data['lastname']) . " " . trim($data['firstname']) . " " . trim($data['firstname2'])."',
+                     '".trim($data['lastname'])."', '".trim($data['organization'])."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
                     }
                 } else {
                     //пользователь существует
@@ -107,8 +107,8 @@ class CarddavSogoDay
                     VALUES ('".$uri."', '" . $card . "', '" . time() . "', '" . time() . "', '0')") OR die(mysqli_error($mysqli2));
 
                         $mysqli2->query("INSERT INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
-                    VALUES ('".$uri."', '".$data['firstname']."', '".$data['lastname'] . " " . $data['firstname'] . " " . $data['firstname2']."',
-                     '".$data['lastname']."', '".$data['organization']."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
+                    VALUES ('".$uri."', '".trim($data['firstname'])."', '".trim($data['lastname']) . " " . trim($data['firstname']) . " " . trim($data['firstname2'])."',
+                     '".trim($data['lastname'])."', '".$data['organization']."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
                     }
                     if ($this->inDecret($data)) {
                         $in_decret[] = $data['uid'];
@@ -297,8 +297,8 @@ class CarddavSogoDay
         $vcard = "BEGIN:VCARD\nVERSION:3.0";
         $vcard .= "\nUID:" . $data['uid'];
         $vcard .= "\nPRODID:-//Apple Inc.//Mac OS X 10.10.5//EN \nREV:" . date("Y-m-d\TH:i:sP");
-        $vcard .= "\nN:" . $data['lastname'] . "\;" . $data['firstname'] . "\;" . $data['firstname2'] . "\;\;";
-        $vcard .= "\nFN:" . $data['lastname'] . " " . $data['firstname'] . " " . $data['firstname2'];
+        $vcard .= "\nN:" . trim($data['lastname']) . "\;" . trim($data['firstname']) . "\;" . trim($data['firstname2']) . "\;\;";
+        $vcard .= "\nFN:" . trim($data['lastname']) . " " . trim($data['firstname']) . " " . trim($data['firstname2']);
         $vcard .= "\nORG:" . $data['organization'];
         $vcard .= "\nTITLE:" . $data['jobtitle'] . " (" . $data['department'] . ")";
         $vcard .= "\nNOTE:" . $data['jobtitle'] . " (" . $data['department'] . ")";
