@@ -8,21 +8,6 @@
  */
 class CarddavSogo
 {
-    const HOST_172 = '192.168.0.172';
-    const USER_172 = 'projecto';
-    const PASSWORD_172 = 'pro3dav5';
-    const BD_172 = 'projectobook';
-
-    const HOST_SOGO = '127.0.0.1';
-    const USER_SOGO = 'root';
-    const PASSWORD_SOGO = 'ecocomp';
-    const BD_SOGO = 'sogo2';
-    const TABLE_QUICK_SOGO = 'sogoadmin00239079b10_quick';
-    const TABLE_MAIN_SOGO = 'sogoadmin00239079b10';
-
-    const TABLE_QUICK_SOGO_DISSMISED = 'sogouser00322098e1d_quick';
-    const TABLE_MAIN_SOGO_DISSMISED = 'sogouser00322098e1d';
-
     const DECRET_GROUP = 'dd43039b-8003-4665-9ffb-28bfe500206b';
     const DISMISSED_GROUP = '14b6476c-745d-4a71-99de-63ba675ef476';
 
@@ -48,34 +33,31 @@ class CarddavSogo
 
 
 
-    function __construct()
+    function __construct($config)
     {
-
-        //$this->delFakedGroups();
-        $this->importDb();
-
+        $this->importDb($config);
     }
 
-    public function importDb()
+    public function importDb($config)
     {
         $dissmised = array();
         $in_decret = array();
         date_default_timezone_set("Europe/Moscow");
-        $mysqli2 = new mysqli(self::HOST_SOGO, self::USER_SOGO, self::PASSWORD_SOGO, self::BD_SOGO);
+        $mysqli2 = new mysqli($config['carddav_db_host'], $config['carddav_db_user'], $config['carddav_db_password'], $config['carddav_db_name']);
         $mysqli2->query("SET NAMES utf8mb");
-        $mysqli = new mysqli(self::HOST_172, self::USER_172, SELF::PASSWORD_172, SELF::BD_172);
+        $mysqli = new mysqli($config['source_db_host'], $config['source_db_user'], $config['source_db_password'], $config['source_db_name']);
         if ($result = $mysqli->query("SELECT * FROM addressbook ad INNER JOIN user_add_info ui ON ad.uid = ui.uid")) {
             while ($data = $result->fetch_assoc()) {
                 $uri = $data['uid'].".vcf";
-                $result2 = $mysqli2->query("SELECT c_creationdate FROM ".self::TABLE_MAIN_SOGO." WHERE c_name='".$uri."'");
+                $result2 = $mysqli2->query("SELECT c_creationdate FROM ". $config['admin_main_tbl'] . " WHERE c_name='".$uri."'");
                 if (empty($result2->fetch_array())) {
                 //новый пользователь
                    $card = $this->makeVcard($data);
                    if ($this->userActive($data)) {
-                       $mysqli2->query("INSERT INTO ".self::TABLE_MAIN_SOGO." (`c_name` ,`c_content`,`c_creationdate`, `c_lastmodified`, `c_version`)
+                       $mysqli2->query("INSERT INTO ". $config['admin_main_tbl'] ." (`c_name` ,`c_content`,`c_creationdate`, `c_lastmodified`, `c_version`)
                     VALUES ('".$uri."', '" . $card . "', '" . time() . "', '" . time() . "', '0')") OR die(mysqli_error($mysqli2));
 
-                       $mysqli2->query("INSERT INTO ".self::TABLE_QUICK_SOGO." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
+                       $mysqli2->query("INSERT INTO ". $config['admin_quick_tbl'] ." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
                     VALUES ('".$uri."', '".trim($data['firstname'])."', '".trim($data['lastname']) . " " . trim($data['firstname']) . " " . trim($data['firstname2'])."',
                      '".trim($data['lastname'])."', '".$data['organization']."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
                    }
@@ -83,28 +65,28 @@ class CarddavSogo
                  //пользователь существует
                     $card = $this->makeVcard($data);
                     if ($this->userActive($data)) {
-                        $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
+                        $mysqli2->query("UPDATE ".$config['admin_main_tbl']." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
 
-                        $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
+                        $mysqli2->query("REPLACE INTO ".$config['admin_quick_tbl']." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
                     VALUES ('".$uri."', '".trim($data['firstname'])."', '".trim($data['lastname']) . " " . trim($data['firstname']) . " " . trim($data['firstname2'])."',
                      '".trim($data['lastname'])."', '".trim($data['organization'])."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
 
                     } else {
-                        $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
-                        $mysqli2->query("DELETE FROM ".self::TABLE_QUICK_SOGO." WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
+                        $mysqli2->query("UPDATE ".$config['admin_main_tbl']." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
+                        $mysqli2->query("DELETE FROM ".$config['admin_quick_tbl']." WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
                     }
                 }
 
 
 
-                $result3 = $mysqli2->query("SELECT c_creationdate FROM ".self::TABLE_MAIN_SOGO_DISSMISED." WHERE c_name='".$uri."'");
+                $result3 = $mysqli2->query("SELECT c_creationdate FROM ".$config['user_main_tbl']." WHERE c_name='".$uri."'");
                 if (empty($result3->fetch_array())) {
                     $card = $this->makeVcard($data);
                     if (!$this->userActive($data)) {
-                        $mysqli2->query("INSERT INTO ".self::TABLE_MAIN_SOGO_DISSMISED." (`c_name` ,`c_content`,`c_creationdate`, `c_lastmodified`, `c_version`)
+                        $mysqli2->query("INSERT INTO ".$config['user_main_tbl']." (`c_name` ,`c_content`,`c_creationdate`, `c_lastmodified`, `c_version`)
                     VALUES ('".$uri."', '" . $card . "', '" . time() . "', '" . time() . "', '0')") OR die(mysqli_error($mysqli2));
 
-                        $mysqli2->query("INSERT INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
+                        $mysqli2->query("INSERT INTO ".$config['user_quick_tbl']." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
                     VALUES ('".$uri."', '".trim($data['firstname'])."', '".trim($data['lastname']) . " " . trim($data['firstname']) . " " . trim($data['firstname2'])."',
                      '".trim($data['lastname'])."', '".$data['organization']."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
                     }
@@ -117,9 +99,9 @@ class CarddavSogo
                 } else {
                     $card = $this->makeVcard($data);
                     if (!$this->userActive($data)) {
-                        $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
+                        $mysqli2->query("UPDATE ".$config['user_main_tbl']." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
 
-                        $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
+                        $mysqli2->query("REPLACE INTO ".$config['user_quick_tbl']." (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
                     VALUES ('".$uri."', '".trim($data['firstname'])."', '".trim($data['lastname']) . " " . trim($data['firstname']) . " " . trim($data['firstname2'])."',
                      '".trim($data['lastname'])."', '".$data['organization']."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
                         if ($this->inDecret($data)) {
@@ -129,8 +111,8 @@ class CarddavSogo
                             $dissmised[] = $data['uid'];
                         }
                     } else {
-                        $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
-                        $mysqli2->query("DELETE FROM ".self::TABLE_QUICK_SOGO_DISSMISED." WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
+                        $mysqli2->query("UPDATE ".$config['user_main_tbl']." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
+                        $mysqli2->query("DELETE FROM ".$config['user_quick_tbl']." WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
                     }
 
                 }
@@ -142,8 +124,8 @@ class CarddavSogo
                 
             }
         }
-	$this->makeGroups($dissmised, $in_decret);
-        $this->delFakedGroups();
+	$this->makeGroups($dissmised, $in_decret, $config);
+        $this->delFakedGroups($config);
         echo "ok";
     }
 
@@ -369,7 +351,7 @@ class CarddavSogo
      * @param $dissmised
      * @param $in_decret
      */
-    private function makeGroups($dissmised, $in_decret) {
+    private function makeGroups($dissmised, $in_decret, $config) {
         $vcard = "BEGIN:VCARD\nVERSION:3.0";
         $vcard .= "\nUID:" . self::DISMISSED_GROUP;
         $vcard .= "\nPRODID:-//Apple Inc.//Mac OS X 10.10.5//EN \nREV:" . date("Y-m-d\TH:i:sP");
@@ -383,13 +365,13 @@ class CarddavSogo
         }
         $vcard .= "\nEND:VCARD";
 
-        $mysqli2 = new mysqli(self::HOST_SOGO, self::USER_SOGO, self::PASSWORD_SOGO, self::BD_SOGO);
+        $mysqli2 = new mysqli($config['carddav_db_host'], $config['carddav_db_user'], $config['carddav_db_password'], $config['carddav_db_name']);
         $mysqli2->query("SET NAMES utf8mb");
 
-        $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_content` = '".$vcard."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null 
+        $mysqli2->query("UPDATE ".$config['user_main_tbl']." SET `c_content` = '".$vcard."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null 
         WHERE `c_name` = '". self::DISMISSED_GROUP. ".vcf'") OR die(mysqli_error($mysqli2));
 
-        $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_component) 
+        $mysqli2->query("REPLACE INTO ".$config['user_quick_tbl']." (c_name ,c_givenname, c_cn, c_component) 
                     VALUES ('".self::DISMISSED_GROUP.".vcf', 'Уволенные', 'Уволенные', 'vcard')") OR die(mysqli_error($mysqli2));
 
         $vcard = "BEGIN:VCARD\nVERSION:3.0";
@@ -405,13 +387,13 @@ class CarddavSogo
         }
         $vcard .= "\nEND:VCARD";
 
-        $mysqli2 = new mysqli(self::HOST_SOGO, self::USER_SOGO, self::PASSWORD_SOGO, self::BD_SOGO);
+        $mysqli2 = new mysqli($config['carddav_db_host'], $config['carddav_db_user'], $config['carddav_db_password'], $config['carddav_db_name']);
         $mysqli2->query("SET NAMES utf8mb");
 
-        $mysqli2->query("UPDATE ".self::TABLE_MAIN_SOGO_DISSMISED." SET `c_content` = '".$vcard."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null 
+        $mysqli2->query("UPDATE ".$config['user_main_tbl']." SET `c_content` = '".$vcard."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = null 
         WHERE `c_name` = '". self::DECRET_GROUP. ".vcf'") OR die(mysqli_error($mysqli2));
 
-        $mysqli2->query("REPLACE INTO ".self::TABLE_QUICK_SOGO_DISSMISED." (c_name ,c_givenname, c_cn, c_component) 
+        $mysqli2->query("REPLACE INTO ".$config['user_quick_tbl']." (c_name ,c_givenname, c_cn, c_component) 
                     VALUES ('".self::DECRET_GROUP.".vcf', 'Декрет', 'Декрет', 'vcard')") OR die(mysqli_error($mysqli2));
 
     }
@@ -419,30 +401,30 @@ class CarddavSogo
     /**
      * Удаляем случайно созданные группы
      */
-    private function delFakedGroups()
+    private function delFakedGroups($config)
     {
         $need_groups = ["'".self::DISMISSED_GROUP . ".vcf'", "'".self::DECRET_GROUP . ".vcf'"];
         /*
-        echo "SELECT sm.c_name FROM " . self::TABLE_MAIN_SOGO_DISSMISED . " sm JOIN " . self::TABLE_QUICK_SOGO_DISSMISED . " sq ON sq.c_name = sm.c_name
+        echo "SELECT sm.c_name FROM " . $config['user_main_tbl'] . " sm JOIN " . $config['user_quick_tbl'] . " sq ON sq.c_name = sm.c_name
          WHERE sq.c_sn = NULL AND sm.c_name NOT IN (" . implode(',', $need_groups) . ")";
         */
-        $mysqli2 = new mysqli(self::HOST_SOGO, self::USER_SOGO, self::PASSWORD_SOGO, self::BD_SOGO);
+        $mysqli2 = new mysqli($config['carddav_db_host'], $config['carddav_db_user'], $config['carddav_db_password'], $config['carddav_db_name']);
         $mysqli2->query("SET NAMES utf8mb");
-        $result4 = $mysqli2->query("SELECT sm.c_name FROM " . self::TABLE_MAIN_SOGO_DISSMISED . " sm JOIN " . self::TABLE_QUICK_SOGO_DISSMISED . " sq ON sq.c_name = sm.c_name 
+        $result4 = $mysqli2->query("SELECT sm.c_name FROM " . $config['user_main_tbl'] . " sm JOIN " . $config['user_quick_tbl'] . " sq ON sq.c_name = sm.c_name 
          WHERE sq.c_o = '' AND sm.c_name NOT IN (" . implode(',', $need_groups) . ")") OR die(mysqli_error($mysqli2));
 
        if (!empty($result4->fetch_array())) {
             while ($data = $result4->fetch_assoc()) {
-                $mysqli2->query("UPDATE " . self::TABLE_MAIN_SOGO_DISSMISED . " SET `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
-                $mysqli2->query("DELETE FROM " . self::TABLE_QUICK_SOGO_DISSMISED . " WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
+                $mysqli2->query("UPDATE " . $config['user_main_tbl'] . " SET `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
+                $mysqli2->query("DELETE FROM " . $config['user_quick_tbl'] . " WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
             }
         }
 
 
-        $result5 = $mysqli2->query("SELECT c_name FROM " . self::TABLE_QUICK_SOGO . "  WHERE c_o = ''") OR die(mysqli_error($mysqli2));
+        $result5 = $mysqli2->query("SELECT c_name FROM " . $config['admin_quick_tbl'] . "  WHERE c_o = ''") OR die(mysqli_error($mysqli2));
             while ($data = $result5->fetch_assoc()) {
-                $mysqli2->query("UPDATE " . self::TABLE_MAIN_SOGO . " SET `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
-                $mysqli2->query("DELETE FROM " . self::TABLE_QUICK_SOGO . " WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
+                $mysqli2->query("UPDATE " . $config['admin_main_tbl'] . " SET `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
+                $mysqli2->query("DELETE FROM " . $config['admin_quick_tbl'] . " WHERE `c_name` = '" . $data['c_name'] . "'") OR die(mysqli_error($mysqli2));
             }
 
     }

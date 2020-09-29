@@ -8,27 +8,20 @@
  */
 class CarddavImages {
 
-    public $host = '192.168.0.172';
-    public $db_user = 'projecto';
-    public $db_pass = 'pro3dav5';
-    public $db_name = 'projectobook';
-    public $width = 500;
-    public $folder = '/home/eakhmetov/sogo/carddav_sogo.dev/photo/';
-
-    function __construct() {
-        $this->cardImages();
+    function __construct($config) {
+        $this->cardImages($config);
     }
 
-    public function cardImages() {
-        $mysqli = new mysqli($this->host, $this->db_user, $this->db_pass, $this->db_name);
+    public function cardImages($config) {
+        $mysqli = new mysqli($config['source_db_host'], $config['source_db_user'], $config['source_db_password'], $config['source_db_name']);
         if ($result = $mysqli->query("SELECT ui.uid, ad.id, FROM_BASE64(ui.image) AS img FROM user_image ui JOIN addressbook ad ON ad.uid = ui.uid")) {
             while ($data = $result->fetch_assoc()) {
                 $im  = imagecreatefromstring($data['img']);
-                $koff = imagesx($im)/$this->width;
+                $koff = imagesx($im)/$config['photo_width'];
                 $height = (int) imagesy($im)/$koff;
-                $thumb = imagecreatetruecolor($this->width, $height);
-                imagecopyresized($thumb, $im, 0, 0, 0, 0, $this->width, $height, imagesx($im), imagesy($im));
-                if (imagejpeg($thumb, $this->folder.$data['uid'].".jpg")) {
+                $thumb = imagecreatetruecolor($config['photo_width'], $height);
+                imagecopyresized($thumb, $im, 0, 0, 0, 0, $config['photo_width'], $height, imagesx($im), imagesy($im));
+                if (imagejpeg($thumb, $config['photo_path'].$data['uid'].".jpg")) {
 
                 }
                 imagedestroy($thumb);

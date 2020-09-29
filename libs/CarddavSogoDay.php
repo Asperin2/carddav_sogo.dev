@@ -8,13 +8,13 @@
  */
 class CarddavSogoDay
 {
-    const HOST_172 = '192.168.0.172';
-    const USER_172 = 'projecto';
-    const PASSWORD_172 = 'pro3dav5';
+    const HOST_172 = 'localhost';
+    const USER_172 = 'bookusr';
+    const PASSWORD_172 = '';
     const BD_172 = 'projectobook';
 
     const HOST_SOGO = '127.0.0.1';
-    const USER_SOGO = 'root';
+    const USER_SOGO = 'sogousr';
     const PASSWORD_SOGO = 'ecocomp';
     const BD_SOGO = 'sogo2';
     const TABLE_QUICK_SOGO = 'sogoadmin00239079b10_quick';
