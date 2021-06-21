@@ -52,10 +52,12 @@ class CarddavSogo
                     $uri = $data['uid'] . ".vcf";
                     echo $uri ."\n";
                     $result2 = $mysqli2->query("SELECT c_creationdate FROM " . $config['admin_main_tbl'] . " WHERE c_name='" . $uri . "'");
+                    echo "1\n";
                     if (empty($result2->fetch_array())) {
                         //новый пользователь
                         $card = $this->makeVcard($data);
                         if ($this->userActive($data)) {
+                            echo "2\n";
                             $mysqli2->query("INSERT INTO " . $config['admin_main_tbl'] . " (`c_name` ,`c_content`,`c_creationdate`, `c_lastmodified`, `c_version`, `inn`)
                     VALUES ('" . $uri . "', '" . $card . "', '" . time() . "', '" . time() . "', '0', " . $data['inn'] . ")") or die(mysqli_error($mysqli2));
 
@@ -67,6 +69,7 @@ class CarddavSogo
                         //пользователь существует
                         $card = $this->makeVcard($data);
                         if ($this->userActive($data)) {
+                            echo "3\n";
                             $mysqli2->query("UPDATE " . $config['admin_main_tbl'] . " SET `c_content` = '" . $card . "', `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = null, `inn` = " . $data['inn'] . " WHERE `c_name` = '" . $uri . "'") or die(mysqli_error($mysqli2));
 
                             $mysqli2->query("REPLACE INTO " . $config['admin_quick_tbl'] . " (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
@@ -74,6 +77,7 @@ class CarddavSogo
                      '" . trim($data['lastname']) . "', '" . trim($data['organization']) . "', '" . $data['jobtitle'] . "', 'vcard')") or die(mysqli_error($mysqli2));
 
                         } else {
+                            echo "4\n";
                             $mysqli2->query("UPDATE " . $config['admin_main_tbl'] . " SET `c_content` = '" . $card . "', `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = 1, `inn` = " . $data['inn'] . " WHERE `c_name` = '" . $uri . "'") or die(mysqli_error($mysqli2));
                             $mysqli2->query("DELETE FROM " . $config['admin_quick_tbl'] . " WHERE `c_name` = '" . $uri . "'") or die(mysqli_error($mysqli2));
                         }
@@ -100,6 +104,7 @@ class CarddavSogo
                     } else {
                         $card = $this->makeVcard($data);
                         if (!$this->userActive($data)) {
+                            echo "5\n";
                             $mysqli2->query("UPDATE " . $config['user_main_tbl'] . " SET `c_content` = '" . $card . "', `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = null, `inn` = " . $data['inn'] . " WHERE `c_name` = '" . $uri . "'") or die(mysqli_error($mysqli2));
 
                             $mysqli2->query("REPLACE INTO " . $config['user_quick_tbl'] . " (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
@@ -112,6 +117,7 @@ class CarddavSogo
                                 $dissmised[] = $data['uid'];
                             }
                         } else {
+                            echo "6\n";
                             $mysqli2->query("UPDATE " . $config['user_main_tbl'] . " SET `c_content` = '" . $card . "', `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = 1, `inn` = " . $data['inn'] . " WHERE `c_name` = '" . $uri . "'") or die(mysqli_error($mysqli2));
                             $mysqli2->query("DELETE FROM " . $config['user_quick_tbl'] . " WHERE `c_name` = '" . $uri . "'") or die(mysqli_error($mysqli2));
                         }
