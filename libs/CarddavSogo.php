@@ -72,7 +72,7 @@ class CarddavSogo
                      '".trim($data['lastname'])."', '".trim($data['organization'])."', '".$data['jobtitle']."', 'vcard')") OR die(mysqli_error($mysqli2));
 
                     } else {
-                        $mysqli2->query("UPDATE ".$config['admin_main_tbl']." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
+                        $mysqli2->query("UPDATE ".$config['admin_main_tbl']." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1, `inn` = " . $data['inn'] . " WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
                         $mysqli2->query("DELETE FROM ".$config['admin_quick_tbl']." WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
                     }
                 }
@@ -111,7 +111,7 @@ class CarddavSogo
                             $dissmised[] = $data['uid'];
                         }
                     } else {
-                        $mysqli2->query("UPDATE ".$config['user_main_tbl']." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1 WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
+                        $mysqli2->query("UPDATE ".$config['user_main_tbl']." SET `c_content` = '".$card."', `c_lastmodified` = ".time().", `c_version` = `c_version` + 1, `c_deleted` = 1, `inn` = " . $data['inn'] . " WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
                         $mysqli2->query("DELETE FROM ".$config['user_quick_tbl']." WHERE `c_name` = '". $uri. "'") OR die(mysqli_error($mysqli2));
                     }
 
