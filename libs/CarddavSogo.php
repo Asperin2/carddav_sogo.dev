@@ -52,6 +52,7 @@ class CarddavSogo
                     $uri = $data['uid'] . ".vcf";
                     $inn = $data['inn'] ? $data['inn'] : '';
                     echo $uri ."\n";
+                    echo $inn ."\n";
                     $result2 = $mysqli2->query("SELECT c_creationdate FROM " . $config['admin_main_tbl'] . " WHERE c_name='" . $uri . "'");
                     if (empty($result2->fetch_array())) {
                         //новый пользователь
