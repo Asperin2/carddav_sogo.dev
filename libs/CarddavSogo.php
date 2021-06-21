@@ -105,7 +105,7 @@ class CarddavSogo
                         $card = $this->makeVcard($data);
                         if (!$this->userActive($data)) {
                             echo "5\n";
-                            $mysqli2->query("UPDATE " . $config['user_main_tbl'] . " SET `c_content` = '" . $card . "', `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = null, `inn` = " . $data['inn'] . " WHERE `c_name` = '" . $uri . "'") or die(mysqli_error($mysqli2));
+                            $mysqli2->query("UPDATE " . $config['user_main_tbl'] . " SET `c_content` = '" . $card . "', `c_lastmodified` = " . time() . ", `c_version` = `c_version` + 1, `c_deleted` = null, `inn` = " . $data['inn']??'' . " WHERE `c_name` = '" . $uri . "'") or die(mysqli_error($mysqli2));
 
                             $mysqli2->query("REPLACE INTO " . $config['user_quick_tbl'] . " (c_name ,c_givenname, c_cn, c_sn, c_o, c_ou, c_component) 
                     VALUES ('" . $uri . "', '" . trim($data['firstname']) . "', '" . trim($data['lastname']) . " " . trim($data['firstname']) . " " . trim($data['firstname2']) . "',
