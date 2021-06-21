@@ -51,6 +51,9 @@ class CarddavSogo
                 try {
                     $uri = $data['uid'] . ".vcf";
                     $inn = $data['inn'] ? $data['inn'] : '';
+                    if (!$inn) {
+                        continue;
+                    }
                     echo $uri ."\n";
                     echo $inn ."\n";
                     $result2 = $mysqli2->query("SELECT c_creationdate FROM " . $config['admin_main_tbl'] . " WHERE c_name='" . $uri . "'");
